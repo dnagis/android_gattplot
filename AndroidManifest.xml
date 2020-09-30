@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="vvnx.gattplot">
+    
+    
+    <!-- si je mets rien il target 27 et ca plante à l'install sur le moto X non rooté 
+    INSTALL_FAILED_OLDER_SDK Requires newer sdk version #27 (current version is #26)] -->
+    <uses-sdk android:targetSdkVersion="26" android:minSdkVersion="10"/>
+    
+    <!-- <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />   
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    
+    
+    
+    <application android:label="gattplot">
+        <activity android:name="GattPlot"
+        android:configChanges="orientation|screenLayout|screenSize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <service
+			android:name=".GattService"
+            android:label="@string/lblsrvc"
+            android:exported="true">
+
+        </service>
+    </application>
+</manifest>
