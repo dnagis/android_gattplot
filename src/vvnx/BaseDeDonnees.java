@@ -8,7 +8,7 @@ import android.database.Cursor;
 import java.util.ArrayList;
 import java.util.List;
 
-//sqlite3 /data/data/vvnx.bluevvnx/databases/data.db "select * from envdata"
+//sqlite3 /data/data/vvnx.gattplot/databases/data.db "select * from envdata"
 
 
 
@@ -69,6 +69,30 @@ public class BaseDeDonnees extends SQLiteOpenHelper {
 		  }
 		  bdd.close();
 		  return times;
+	}
+	
+	//Retourne un array (une liste) avec epoch, valeur, epoch, valeur ... (pour AndroidPlot: XY_VALS_INTERLEAVED)
+	public List<Integer> fetchInterleavedEpochValue() {
+		List<Integer> values = new ArrayList<>();
+		String GET_ALL_TIMES = "SELECT * FROM ENVDATA";
+		bdd = this.getReadableDatabase();
+		  if(bdd!=null)
+		  {
+		     Cursor cursor = bdd.rawQuery(GET_ALL_TIMES, null);
+		     cursor.moveToFirst();
+		     while(!cursor.isAfterLast())
+		     {
+		       values.add(cursor.getInt(cursor.getColumnIndex("ALRMTIME")));
+		       values.add(cursor.getInt(cursor.getColumnIndex("COUNT")));
+		       cursor.moveToNext();
+		     }
+		     cursor.close();
+		  } else {
+			  values.add(1);
+			  values.add(0);
+			}
+		  bdd.close();
+		  return values;
 	}
 	
 	

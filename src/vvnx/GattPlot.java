@@ -19,8 +19,6 @@ import android.widget.TextView;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 import android.util.Log;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 
 import android.os.Message;
 import android.os.Messenger;
@@ -37,6 +35,20 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
 
+import android.graphics.*;
+//import android.graphics.Color; //était dans bluevvnx, mais comme j'import graphics.* maintenant...
+import android.graphics.drawable.Drawable;
+
+import com.androidplot.util.PixelUtils;
+import com.androidplot.xy.SimpleXYSeries;
+import com.androidplot.xy.XYSeries;
+import com.androidplot.xy.*;
+
+import java.text.FieldPosition;
+import java.text.Format;
+import java.text.ParsePosition;
+import java.util.*;
+
 //sql
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -48,14 +60,14 @@ public class GattPlot extends Activity {
 	boolean mSceBound = false;
 	Messenger mService = null;
 
-	private Drawable default_btn;
-	
+	private Drawable default_btn;	
 	TextView textview1, textview2, textview3;
+	private XYPlot plot;
+	
+	private BaseDeDonnees maBDD;
 
-    /**
-     * manifest attribut d'activity pour prevent passage ici quand rotation:
-     * android:configChanges="orientation|screenLayout|screenSize"
-     */
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate()");
@@ -72,8 +84,35 @@ public class GattPlot extends Activity {
         Button button1 = findViewById(R.id.button_1);
         default_btn = button1.getBackground();   
         
-        
+
+       
+     
     }
+    
+    @Override
+	public void onResume(){
+	    super.onResume();
+	    Log.d(TAG, "onResume()");
+	    
+        plot = (XYPlot) findViewById(R.id.plot);        
+        //Des valeurs static pour test
+        //List<Integer> myVals = Arrays.asList(new Integer[]{1601280124, 2, 1601280224, 3, 1601280524, 4, 1601280624, 5});        
+        
+        maBDD = new BaseDeDonnees(this);
+        List<Integer> myVals = maBDD.fetchInterleavedEpochValue();        
+		
+		XYSeries my_series = new SimpleXYSeries(myVals, SimpleXYSeries.ArrayFormat.XY_VALS_INTERLEAVED, "my series");			
+        plot.setDomainStep(StepMode.SUBDIVIDE, 4);
+		LineAndPointFormatter series1Format = new LineAndPointFormatter(this, R.xml.point_formatter);
+		plot.clear();
+        plot.addSeries(my_series, series1Format);
+        plot.getGraph().setLineLabelRenderer(XYGraphWidget.Edge.BOTTOM, new MyLineLabelRenderer()); 	    
+	    
+	    
+	    
+	    
+	
+	}
     
     public void ActionPressBouton_1(View v) {
 		Log.d(TAG, "press bouton 1");
@@ -172,6 +211,18 @@ public class GattPlot extends Activity {
 			mSceBound = true;
         }
     };
+    
+    
+	class MyLineLabelRenderer extends XYGraphWidget.LineLabelRenderer {
+        @Override
+        protected void drawLabel(Canvas canvas, String text, Paint paint, float x, float y, boolean isOrigin) {
+                long epoch = (long)Double.parseDouble(text.replaceAll(",",".")); 
+				Date date = new Date( epoch * 1000);
+				SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");                
+                text = sdf.format(date);  
+                super.drawLabel(canvas, text, paint, x, y , isOrigin);
+        }
+    }
 	
 }
 
